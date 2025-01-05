@@ -1,9 +1,7 @@
-package main
+package cm2obj
 
 import (
 	"errors"
-	"fmt"
-	"log"
 	"os"
 	"path"
 	"strconv"
@@ -13,33 +11,31 @@ import (
 	"github.com/nameless9000/cm2go/build"
 )
 
-func main() {
+func Gen(FileObj, FileMtl string) (string, error) {
 	//var Mode = os.Args[1]
-	var FileObj = os.Args[2]
-	var FileMtl = os.Args[3]
 
 	objReader, err := os.Open(FileObj)
 
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	defer objReader.Close()
 
 	mtlReader, err := os.Open(FileMtl)
 
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	defer mtlReader.Close()
 
 	if path.Ext(FileMtl) != ".mtl" {
-		log.Fatal(errors.New("ERROR: Please use a mtl file with the extention '.mtl'"))
+		return "", errors.New("ERROR: Please use a mtl file with the extention '.mtl'")
 	}
 
 	obj, err := getObj(objReader, mtlReader)
 
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	var collection block.Collection
 	var thingieidk *block.Base
@@ -61,9 +57,9 @@ func main() {
 	out, err := build.Compile([]block.Collection{collection})
 
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
-	fmt.Println(out)
+	return out, nil
 }
 
 func getObj(objReader, mtlReader *os.File) (*obj.Decoder, error) {
